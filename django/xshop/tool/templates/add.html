@@ -1,0 +1,25 @@
+<form method="post">
+    {% csrf_token %}
+    请输入每1个数:<input name="num01" /> <br/>
+    请输入每2个数:<input name="num02" /> <br/>
+
+    <input type="submit" value="提交"> <br/>
+
+    {{ result }}
+
+    {% if result != None %}
+        结果为: {{ result.data }}
+        {% if result.message != None %}
+            <br/>
+            错误: {{ request.message }}
+        {% endif %}
+    {% endif %}
+</form>
+3333
+<script type="text/javascript" src="/common_static/js/jquery.js"></script>
+
+<script type="text/javascript">
+    $(function(){
+        alert(321);
+    })
+</script>

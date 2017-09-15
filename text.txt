@@ -1,0 +1,12 @@
+Perhaps we want to save some user login information such as login
+ame, the teletype at which the user logged in, when the user logged in,
+nd from where. Using str.split() on the preceding example would not
+e effective because the spacing is erratic and inconsistent. The other prob-
+m is that there is a space between the month, day, and time for the login
+mestamps. We would probably want to keep these fields together.
+You need some way to describe a pattern such as “split on two or more
+paces.” This is easily done with regular expressions. In no time, we whip up
+he regex pattern \s\s+, which means at least two whitespace characters.
+Let’s create a program called rewho.py that reads the output of the who
+ommand, presumably saved into a file called whodata.txt. Our rewho.py
+cript initially looks something like this:

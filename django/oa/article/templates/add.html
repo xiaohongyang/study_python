@@ -1,0 +1,17 @@
+{% include 'common/header.html' %}
+
+{% include 'common/nav.html' %}
+{{ BASE_DIR }}
+<form  method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="提交">
+</form>
+
+<script type="text/javascript" src="/static/js/jquery.js"></script>
+
+<script type="text/javascript">
+    $(function(){
+        alert( "hi" );
+    })
+</script>

@@ -1,0 +1,53 @@
+{% include 'common/header.html' %}
+
+{% include 'common/nav.html' %}
+
+<br/>
+<div>
+    <section>
+        <header>
+            文章列表
+        </header>
+        {% for article in listData  %}
+            <div>
+                {% if forloop.first  %}
+                    <b>
+                        {{ forloop.counter }}:{{ article.title }}
+                    </b>
+                {% else %}
+                    {{ forloop.counter }}:{{ article.title }}
+                {% endif %}
+
+                {% if forloop.last %}
+                    <br/>
+                    <br/>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </section>
+
+    <section>
+        <header>
+            文章列表2
+        </header>
+        {% for key,item in listData2 %}
+            <div>
+                {{ key }} : {{ item }}
+            </div>
+        {% endfor %}
+    </section>
+
+    <section>
+        <header>
+            文章列表3
+        </header>
+        {% for key,item in listData3 %}
+            <div>
+                {{ key }} : {{ item }}
+            </div>
+        {% empty %}
+            暂无文章...
+        {% endfor %}
+    </section>
+</div>
+

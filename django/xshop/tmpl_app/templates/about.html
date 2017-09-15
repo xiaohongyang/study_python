@@ -1,0 +1,36 @@
+
+
+<a href="{% url 'about' %}">关于我们</a>
+<a href="{% url 'help' %}"> help </a>
+
+
+
+
+
+{% for tutoria in tutoriaList %}
+
+    {% if forloop.first %}
+        <hr/>
+    {% endif %}
+
+    {{ forloop.revcounter }}
+
+    {{ tutoria }} {% if not forloop.last %} -- {% endif %}
+{% endfor %}
+
+<hr/>
+
+
+
+{% for key,value in infoDisc.items %}
+    {{ key }}:{{ value }} <br/>
+{% endfor %}
+
+
+
+<script type="text/javascript" >
+
+    var json = {{ infoJson | safe}}
+    alert(json.title);
+
+</script>
