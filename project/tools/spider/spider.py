@@ -56,7 +56,22 @@ class Spider:
         i = 1;
         for link in self.linkList:
             i += 1
-            self.saveImg(link, saveDir + "/" + prefix +str(i)+suffix)
+            theSuffix = suffix
+            if suffix=='':
+                theSuffix = '.' + self.getImageSuffix(link)
+
+            self.saveImg(link, saveDir + "/" + prefix +str(i) + theSuffix)
+
+    def getImageSuffix(self,url):
+
+        suffix = ''
+        if len(url)>1 :
+            arr = url.split('.')
+            index = len(arr) - 1
+            suffix = arr[index]
+
+        return suffix
+
 
 
 
