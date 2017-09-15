@@ -1,8 +1,0 @@
-<component name="libraryTable">
-  <library name="Google App Engine SDK" type="python">
-    <CLASSES>
-      <root url="file://$PROJECT_DIR$/django/xhy/xhy" />
-    </CLASSES>
-    <SOURCES />
-  </library>
-</component>
