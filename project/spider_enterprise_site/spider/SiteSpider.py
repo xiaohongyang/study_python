@@ -3,9 +3,12 @@ import types
 from project.tools.spider.spider_text import *
 from  pathlib import Path;
 from project.spider_enterprise_site.spider.SpiderCssFile import SpiderCssFile
+import re
+
 
 class SiteSpider :
 
+    cssRe = re.compile(r'')
     def __init__(self, domain, indexPage=""):
 
         self.domain = domain
@@ -34,23 +37,30 @@ class SiteSpider :
 
         # 抓取页面
         # 1.抓取html
-        self.__spiderHtml(url)
+        htmlContent = self.__spiderHtml(url)
 
         # 2.抓取css
-        self.__spiderCss(url)
+        self.__spiderCss(url, htmlContent)
 
         # 3.抓取js
         self.__spiderJs(url)
 
     def __spiderHtml(self, url):
         # 抓取html
-        spider = SpiderText(url)
-        fileName = self.__getPageFileName(url)
-        filePath = self.savePath + "/" + fileName
-        spider.saveText(url, filePath)
-        pass
 
-    def __spiderCss(self, url):
+        result = ""
+        try:
+            spider = SpiderText(url)
+            fileName = self.__getPageFileName(url)
+            filePath = self.savePath + "/" + fileName
+            spider.saveText(url, filePath)
+            result = spider.content
+        except Exception:
+            print(Exception.__str__())
+            pass;
+        return result
+
+    def __spiderCss(self, htmlContent):
         # 抓取css
         #1. 抓取所有css url
         #2. 抓取所有提取到的css文件并保存到本地

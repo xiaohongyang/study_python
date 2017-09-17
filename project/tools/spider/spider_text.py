@@ -6,6 +6,8 @@ from urllib import  request
 
 class SpiderText:
 
+    content = ""
+
     def __init__(self, url=''):
         self.url = url
         self.header = {}
@@ -21,6 +23,9 @@ class SpiderText:
         req = urllib.request.Request(url,headers = header)
         html = urllib.request.urlopen(req)
         fileData = html.read()
+
+        self.content = fileData
+
         file = open(fileName, 'wb')
         file.write(fileData)
         file.close()
