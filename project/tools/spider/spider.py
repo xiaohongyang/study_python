@@ -1,4 +1,5 @@
 import os
+import sys
 from bs4 import BeautifulSoup
 from urllib import *
 import urllib
@@ -17,8 +18,9 @@ class Spider:
     def saveImg(self, url, fileName):
 
         header = self.header
-        #url = "http://s3.51cto.com/wyfs02/M01/30/03/wKioL1OiryfgvGZVAAIosMpN4lo679.jpg"
+        url = "http://code.ziqiangxuetang.com/static/zqxt_qrcode.jpg"
 
+        # print(url)
         try:
             req = urllib.request.Request(url,headers = header)
             html = urllib.request.urlopen(req)
@@ -27,6 +29,8 @@ class Spider:
             file.write(fileData)
             file.close()
         except:
+            print("file not exists")
+            print("Unexpected error:", sys.exc_info()[0])
             pass
 
         # html = urllib.request.urlopen(url)
@@ -50,8 +54,6 @@ class Spider:
     #suffix 文件名后缀
     #prefix 文件名前缀
     def downLinkList(self,saveDir, suffix='', prefix=''):
-
-
 
         i = 1;
         for link in self.linkList:

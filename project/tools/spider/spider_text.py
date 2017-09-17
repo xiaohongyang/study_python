@@ -6,15 +6,16 @@ from urllib import  request
 
 class SpiderText:
 
-    def __init__(self, url):
+    def __init__(self, url=''):
         self.url = url
         self.header = {}
         self.linkList = []
-    '''
-    url 要下载的地址
-    fileName 新建文件名
-    '''
+
     def saveText(self, url, fileName):
+        '''
+        url 要下载的地址
+        fileName 新建文件名
+        '''
 
         header = self.header
         req = urllib.request.Request(url,headers = header)
