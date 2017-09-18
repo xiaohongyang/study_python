@@ -4,55 +4,72 @@ from project.tools.spider.spider_text import *
 from  pathlib import Path;
 import re
 import base64
+import urllib
+import project.spider_enterprise_site.spider.SpiderCssFile as SiteSpider
+import sys
 
-#1. 抓取所有css url
-#2. 抓取所有提取到的css文件并保存到本地
-#3. 替换所有css url
-class SpiderCssFile :
+#1. 抓取所有html url
+#2. 抓取所有提取到的html文件并保存到本地
+#3. 替换所有html url
+class SpiderHtmlFile :
     urlList = []
     rootDir = []
-    def __init__(self, content, cssRe, relativeDir, rootDir):
+    def __init__(self, content, htmlRe, relativeDir, rootDir, domain):
 
         self.content = content
-        self.cssRe = cssRe
+        self.htmlRe = htmlRe
         self.relativeDir = relativeDir
         self.rootDir = rootDir
+        self.domain = domain
 
     def run(self):
-        self.getCssUrlList()
-        self.saveCssFiles()
+        self.getHtmlUrlList()
+        self.saveHtmlFiles()
         self.replaceContent()
         pass
 
-    def getCssUrlList(self):
-        # 1. 抓取所有css url
+    def getHtmlUrlList(self):
+        # 1. 抓取所有html url
         self.urlList = []
-        for reItem in self.cssRe:
+        for reItem in self.htmlRe:
             list = reItem.findall(self.content)
             if len(list) :
                 self.urlList.extend(list)
+        tmpList = []
+        for k,url in enumerate(self.urlList):
+            url = url.replace(' ','')
+            if url in ['','/',
+                       '/index.html',
+                       '/index.php','/index','index','index.html','index.php'] \
+                    == False :
+                self.urlList.remove(url)
+            else :
+                tmpList.append(url)
+        self.urlList = tmpList
         pass
 
-    def saveCssFiles(self):
-        # 2. 抓取所有提取到的css文件并保存到本地
+    def saveHtmlFiles(self):
+        # 2. 抓取所有提取到的html文件并保存到本地
         if len(self.urlList) > 0 :
             for url in self.urlList :
-                savePath = self.getNewFilePath(url)
 
-                if os.path.isfile(savePath) == False :
-                    spiderTextObj = SpiderText()
-                    spiderTextObj.saveText(url, savePath)
+                #下载页面
+                spider = SiteSpider(self.domain)
+                spider.run(url)
+                return
 
         pass
 
     def replaceContent(self):
-        # 3. 替换所有css url
+        # 3. 替换所有html url
         if len(self.urlList) > 0 :
+
+            spider = SiteSpider(self.domain)
             for url in self.urlList :
                 if isinstance(url, str) :
-                    savePath = self.getNewFilePath(url, isAbsolutPath=False)
-                    savePath = './' + savePath
-                    #替换为本地新的css url
+
+                    savePath = spider.getPageFileName(url)
+                    #替换为本地新的html url
                     self.content = self.content.replace(url, savePath)
         pass
 
@@ -78,12 +95,12 @@ class SpiderCssFile :
             try :
                 if os.path.exists(saveDir) == False:
                     os.makedirs(saveDir)
-                savePath = saveDir + '/' + fileName + '.css'
+                savePath = saveDir + '/' + fileName + '.html'
             except Exception as e:
                 savePath = False
                 print(str(e))
         else :
-            savePath = self.relativeDir + "/" + fileName + '.css'
+            savePath = self.relativeDir + "/" + fileName + '.html'
         return  savePath
         pass
 
