@@ -39,9 +39,13 @@ class SpiderCssFile :
             for url in self.urlList :
                 savePath = self.getNewFilePath(url)
 
-                if os.path.isfile(savePath) == False :
-                    spiderTextObj = SpiderText()
-                    spiderTextObj.saveText(url, savePath)
+                oldUrl = url
+                try :
+                    if os.path.isfile(savePath) == False :
+                        spiderTextObj = SpiderText()
+                        spiderTextObj.saveText(url, savePath)
+                except Exception as e:
+                    self.urlList.remove(oldUrl)
 
         pass
 

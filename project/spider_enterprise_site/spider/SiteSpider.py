@@ -5,11 +5,19 @@ from  pathlib import Path;
 from project.spider_enterprise_site.spider.SpiderCssFile import SpiderCssFile
 from project.spider_enterprise_site.spider.SpiderJsFile import SpiderJsFile
 from project.spider_enterprise_site.spider.SpiderImageFile import SpiderImageFile
-from project.spider_enterprise_site.spider.SpiderHtmlFile import SpiderHtmlFile
 import re
 
 
 class SiteSpider :
+
+    @staticmethod
+    def setLevel(level):
+        SiteSpider.level = level
+
+    @staticmethod
+    def getLevel():
+        return SiteSpider.level
+    fileList = []
 
     level = 0
     cssRe = [
@@ -41,11 +49,12 @@ class SiteSpider :
 
     htmlContent = ""
 
-    def __init__(self, domain, indexPage=""):
+    def __init__(self, domain, indexPage="", spiderChildLevel=False):
 
         self.domain = domain
         self.indexPage = indexPage if indexPage==None else ""
         self.savePath = os.getcwd() + "/" + self.__getDomainName()
+        self.spiderChildLevel = spiderChildLevel
         self.__checkAndCreateSaveDir()
 
 
@@ -58,15 +67,16 @@ class SiteSpider :
 
         self.__spiderSpecialPage(url)
 
+        level = self.getLevel()
+        if level > 0 :
+            SiteSpider.setLevel(level - 1)
 
     def __spiderSpecialPage(self, url=''):
         # 抓取首页
         if url=='' :
             indexPage = self.__getPageName()
             self.__spiderPage(indexPage)
-            #抓取首页下面的所有一级页面
-            self.level += 1
-            # self.__spiderJumpHtml(self.htmlContent)
+
         else :
             self.__spiderPage(url)
         pass
@@ -86,6 +96,9 @@ class SiteSpider :
         # 4.抓取图片
         self.__spiderImage(self.htmlContent)
 
+        if self.spiderChildLevel :
+            self.__spiderJumpHtml(self.htmlContent)
+
         self.__saveHtml(url)
 
     def __spiderHtml(self, url):
@@ -97,8 +110,8 @@ class SiteSpider :
             filePath = self.savePath + "/" + fileName
             spider.setUrlContent(url)
             self.__updateContent(str(spider.content, 'utf-8'))
-        except Exception:
-            print(Exception.__str__())
+        except Exception as e:
+            print(str(e))
             pass;
 
     def __saveHtml(self, url):
@@ -193,8 +206,10 @@ class SiteSpider :
             prex = '_'.join(arr[0:index])
             fileName = prex + '_' + fileName
             domainName = self.__getDomainName()
-            if fileName.index(domainName) != None :
+            if fileName.find(domainName) != -1 :
                 fileName = fileName.replace(domainName + "_", "")
+            elif fileName[0] == "_" :
+                fileName = fileName[1:(len(fileName))]
 
 
         if fileName == "" :
@@ -212,9 +227,123 @@ class SiteSpider :
     pass
 
 
+class SpiderHtmlFile :
+    urlList = []
+    rootDir = []
+    def __init__(self, content, htmlRe, relativeDir, rootDir, domain):
+
+        self.content = content
+        self.htmlRe = htmlRe
+        self.relativeDir = relativeDir
+        self.rootDir = rootDir
+        self.domain = domain
+
+    def run(self):
+        self.getHtmlUrlList()
+        self.saveHtmlFiles()
+        self.replaceContent()
+        pass
+
+    def getHtmlUrlList(self):
+        # 1. 抓取所有html url
+        self.urlList = []
+        for reItem in self.htmlRe:
+            list = reItem.findall(self.content)
+            if len(list) :
+                self.urlList.extend(list)
+        tmpList = []
+        for k,url in enumerate(self.urlList):
+            url = url.replace(' ','')
+            if url in ['','/',
+                       '/index.html',
+                       '/index.php','/index','index','index.html','index.php'] \
+                    != False \
+                    or url.find('mailto:') != -1 \
+                    or url.find('qq.com') != -1 \
+                    or url.find('baidu.com') != -1 \
+                    or url.find('javascript:;') != -1 :
+                self.urlList.remove(url)
+            else :
+                tmpList.append(url)
+        uniqueList = []
+        [uniqueList.append(i) for i in tmpList if not i in uniqueList]
+        self.urlList = uniqueList
+        pass
+
+    def saveHtmlFiles(self):
+        # 2. 抓取所有提取到的html文件并保存到本地
+        if len(self.urlList) > 0 :
+
+            level = SiteSpider.getLevel()
+            if level < 4 :
+
+                SiteSpider.setLevel(level + 1)
+                for url in self.urlList :
+
+                    oldUrl = url
+                    #下载页面
+                    try :
+                        spider = SiteSpider(self.domain, spiderChildLevel=True)
+                        if(url.find(self.domain) == -1 and url[0:3] != "http") :
+                            url = self.domain + '/' + url  if  url[0] != '/' else self.domain + url
+                        spider.run(url)
+                        if spider.htmlContent == "" :
+                            self.urlList.remove(oldUrl)
+                    except Exception as e:
+                        (self.urlList).remove(oldUrl)
+                        print("faild url:", oldUrl)
+
+        pass
+
+    def replaceContent(self):
+        # 3. 替换所有html url
+        if len(self.urlList) > 0 :
+
+            spider = SiteSpider(self.domain)
+            for url in self.urlList :
+                if isinstance(url, str) :
+
+                    savePath = spider.getPageFileName(url)
+                    #替换为本地新的html url
+                    self.content = self.content.replace(url, savePath)
+        pass
+
+
+    def getNewFilePath(self, url, isAbsolutPath=True):
+
+        #fileName = base64.b64encode(bytes(url, 'utf-8'))
+        # fileName = str(fileName)
+
+        r = re.compile('^http.*',re.I)
+        url = url if r.match(url) != None else  self.domain + url
+
+        fileName = url.replace('/','__')
+        fileName = fileName.replace('\\','___')
+        fileName = fileName.replace(':','____')
+        fileName = fileName.replace('?','_____')
+        fileName = fileName.replace('&','_______')
+        fileName = fileName.replace('%','________')
+        fileName = fileName[0:120]
+        saveDir = self.relativeDir
+        if isAbsolutPath :
+            saveDir = self.rootDir + '/' + saveDir
+            try :
+                if os.path.exists(saveDir) == False:
+                    os.makedirs(saveDir)
+                savePath = saveDir + '/' + fileName + '.html'
+            except Exception as e:
+                savePath = False
+                print(str(e))
+        else :
+            savePath = self.relativeDir + "/" + fileName + '.html'
+        return  savePath
+        pass
+
+
 if __name__ == '__main__' :
     domain = "http://chongwumoban.s5.cn.vc"
-    spider = SiteSpider("http://chongwumoban.s5.cn.vc")
+    SiteSpider.setLevel(SiteSpider.getLevel()+1)
+    spider = SiteSpider("http://chongwumoban.s5.cn.vc", spiderChildLevel=True)
     spider.run()
     # spider.run("http://chongwumoban.s5.cn.vc/fuwu")
 

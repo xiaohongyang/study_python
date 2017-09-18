@@ -42,13 +42,17 @@ class SpiderImageFile :
 
                 savePath = self.getNewFilePath(url)
 
-                if os.path.isfile(savePath) == False :
-                    spiderTextObj = SpiderText()
+                oldUrl = url
+                try:
+                    if os.path.isfile(savePath) == False :
+                        spiderTextObj = SpiderText()
 
-                    downUrl = url
-                    r = re.compile('^http.*',re.I)
-                    downUrl = downUrl if r.match(downUrl) != None else  self.domain + downUrl
-                    spiderTextObj.saveText(downUrl, savePath)
+                        downUrl = url
+                        r = re.compile('^http.*',re.I)
+                        downUrl = downUrl if r.match(downUrl) != None else  self.domain + downUrl
+                        spiderTextObj.saveText(downUrl, savePath)
+                except Exception as e :
+                    self.urlList.remove(oldUrl)
 
         pass
 
