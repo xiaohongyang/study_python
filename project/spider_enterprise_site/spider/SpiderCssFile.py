@@ -10,11 +10,13 @@ import base64
 #3. 替换所有css url
 class SpiderCssFile :
     urlList = []
-    def __init__(self, content, cssRe, saveDir):
+    rootDir = []
+    def __init__(self, content, cssRe, saveDir, rootDir):
 
         self.content = content
         self.cssRe = cssRe
         self.saveDir = saveDir
+        self.rootDir = rootDir
 
     def run(self):
         self.getCssUrlList()
@@ -49,6 +51,7 @@ class SpiderCssFile :
             for url in self.urlList :
                 if isinstance(url, str) :
                     savePath = self.getNewFilePath(url, isAbsolutPath=False)
+                    savePath = './' + savePath
                     #替换为本地新的css url
                     self.content = self.content.replace(url, savePath)
         pass
@@ -64,14 +67,17 @@ class SpiderCssFile :
         fileName = fileName.replace(':','____')
         fileName = fileName.replace('?','_____')
         fileName = fileName[0:100]
-        saveDir = os.getcwd() +  '/' + self.saveDir if isAbsolutPath  else   '/' + self.saveDir
-        try :
-            if os.path.exists(saveDir) == False:
-                os.makedirs(saveDir)
-            savePath = saveDir + '/' + fileName + '.css'
-        except Exception as e:
-            savePath = False
-            print(str(e))
+        saveDir = self.saveDir
+        if isAbsolutPath :
+            try :
+                if os.path.exists(saveDir) == False:
+                    os.makedirs(saveDir)
+                savePath = saveDir + '/' + fileName + '.css'
+            except Exception as e:
+                savePath = False
+                print(str(e))
+        else :
+            savePath = self.saveDir + "/" + fileName + '.css'
         return  savePath
         pass
 

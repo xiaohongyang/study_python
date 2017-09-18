@@ -82,9 +82,9 @@ class SiteSpider :
         #1. 抓取所有css url
         #2. 抓取所有提取到的css文件并保存到本地
         #3. 替换所有css url
-        cssDir = self.savePath +  '/' +'static_source/css'
-        spiderText = SpiderText()
-        spiderCss = SpiderCssFile(htmlContent, self.cssRe, self.cssDir)
+        # cssDir = self.savePath + '/' + self.cssDir
+        # spiderText = SpiderText()
+        spiderCss = SpiderCssFile(htmlContent, self.cssRe, saveDir=self.cssDir, rootDir=self.savePath)
         spiderCss.run()
         self.__updateContent(spiderCss.content)
         pass
