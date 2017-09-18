@@ -24,8 +24,11 @@ class SpiderCssFile :
 
     def getCssUrlList(self):
         # 1. 抓取所有css url
-        self.cssRe = re.compile(self.cssRe, re.I)
-        self.urlList = self.cssRe.findall(self.content)
+        self.urlList = []
+        for reItem in self.cssRe:
+            list = reItem.findall(self.content)
+            if len(list) :
+                self.urlList.extend(list)
         pass
 
     def saveCssFiles(self):
@@ -44,23 +47,36 @@ class SpiderCssFile :
         # 3. 替换所有css url
         if len(self.urlList) > 0 :
             for url in self.urlList :
-                savePath = self.getNewFilePath(url, isAbsolutPath=False)
-                #替换为本地新的css url
-                self.content.replace(url, savePath)
+                if isinstance(url, str) :
+                    savePath = self.getNewFilePath(url, isAbsolutPath=False)
+                    #替换为本地新的css url
+                    self.content = self.content.replace(url, savePath)
         pass
 
 
     def getNewFilePath(self, url, isAbsolutPath=True):
-        fileName = base64.b64encode(bytes(url, 'utf-8'))
+
+        #fileName = base64.b64encode(bytes(url, 'utf-8'))
+        # fileName = str(fileName)
+
+        fileName = url.replace('/','__')
+        fileName = fileName.replace('\\','___')
+        fileName = fileName.replace(':','____')
+        fileName = fileName.replace('?','_____')
+        fileName = fileName[0:100]
         saveDir = os.getcwd() +  '/' + self.saveDir if isAbsolutPath  else   '/' + self.saveDir
-        savePath = saveDir + '/' + fileName + '.css'
+        try :
+            if os.path.exists(saveDir) == False:
+                os.makedirs(saveDir)
+            savePath = saveDir + '/' + fileName + '.css'
+        except Exception as e:
+            savePath = False
+            print(str(e))
         return  savePath
         pass
 
 
 
 if __name__ == '__main__' :
-    domain = "http://chongwumoban.s5.cn.vc"
-    spider = SpiderCssFile("http://chongwumoban.s5.cn.vc")
-    spider.run()
+    pass
 

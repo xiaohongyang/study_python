@@ -18,7 +18,21 @@ class SpiderText:
         url 要下载的地址
         fileName 新建文件名
         '''
+        self.setUrlContent(url)
 
+        try:
+            file = open(fileName, 'wb')
+            file.write(self.content)
+            file.close()
+        except Exception as e:
+            print(str(e))
+        # html = urllib.request.urlopen(url)
+        # data = html.read()
+        # img = open(fileName, "wb")
+        # img.write(data)
+        # img.close()
+
+    def setUrlContent(self, url):
         header = self.header
         req = urllib.request.Request(url,headers = header)
         html = urllib.request.urlopen(req)
@@ -26,14 +40,20 @@ class SpiderText:
 
         self.content = fileData
 
-        file = open(fileName, 'wb')
-        file.write(fileData)
-        file.close()
-        # html = urllib.request.urlopen(url)
-        # data = html.read()
-        # img = open(fileName, "wb")
-        # img.write(data)
-        # img.close()
+    def setContent(self, content):
+        self.content = content
+
+    def save(self, fileName):
+        try:
+            file = open(fileName, 'wb')
+            file.write(self.content)
+            file.close()
+        except Exception as e:
+            print(str(e))
+
+    def setFieName(self, fileName):
+        self.fileName = fileName
+
     def setHeader(self, header):
 
         self.header = header

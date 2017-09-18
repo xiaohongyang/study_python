@@ -8,7 +8,13 @@ import re
 
 class SiteSpider :
 
-    cssRe = re.compile(r'')
+    cssRe = [
+        re.compile(r'link[^"]+href="([^"]+)"', re.I),
+        re.compile(r'link[^\']+href=\'([^\']+)\'', re.I)
+    ]
+    cssDir = "static_source/css"
+    htmlContent = ""
+
     def __init__(self, domain, indexPage=""):
 
         self.domain = domain
@@ -30,35 +36,46 @@ class SiteSpider :
     def __spiderIndex(self):
         # 抓取首页
         indexPage = self.__getIndexPage()
-        self.__spiderHtml(indexPage)
+        self.__spiderPage(indexPage)
         pass
 
-    def ___spiderPage(self, url):
+    def __spiderPage(self, url):
 
         # 抓取页面
         # 1.抓取html
-        htmlContent = self.__spiderHtml(url)
+        self.__spiderHtml(url)
 
         # 2.抓取css
-        self.__spiderCss(url, htmlContent)
+        self.__spiderCss(self.htmlContent)
 
         # 3.抓取js
         self.__spiderJs(url)
 
+        self.__saveHtml(url)
+
     def __spiderHtml(self, url):
         # 抓取html
 
-        result = ""
         try:
             spider = SpiderText(url)
             fileName = self.__getPageFileName(url)
             filePath = self.savePath + "/" + fileName
-            spider.saveText(url, filePath)
-            result = spider.content
+            spider.setUrlContent(url)
+            self.__updateContent(str(spider.content, 'utf-8'))
         except Exception:
             print(Exception.__str__())
             pass;
-        return result
+
+    def __saveHtml(self, url):
+        try:
+            spider = SpiderText()
+            fileName = self.__getPageFileName(url)
+            filePath = self.savePath + '/' + fileName
+            content = bytes(self.htmlContent, 'utf-8')
+            spider.setContent(content)
+            spider.save(filePath)
+        except Exception as e :
+            print(str(e))
 
     def __spiderCss(self, htmlContent):
         # 抓取css
@@ -67,8 +84,13 @@ class SiteSpider :
         #3. 替换所有css url
         cssDir = self.savePath +  '/' +'static_source/css'
         spiderText = SpiderText()
-        spiderCss = SpiderCssFile()
+        spiderCss = SpiderCssFile(htmlContent, self.cssRe, self.cssDir)
+        spiderCss.run()
+        self.__updateContent(spiderCss.content)
         pass
+
+    def __updateContent(self, content):
+        self.htmlContent = content
 
     def __spiderJs(self, url):
         #抓取js
