@@ -17,7 +17,7 @@ class SiteSpider :
     @staticmethod
     def getLevel():
         return SiteSpider.level
-    fileList = []
+    downingList = []
 
     level = 0
     cssRe = [
@@ -64,6 +64,12 @@ class SiteSpider :
 
 
     def run(self,url=''):
+
+        if url in SiteSpider.downingList :
+
+            return False
+
+        SiteSpider.downingList.append(url)
 
         self.__spiderSpecialPage(url)
 
@@ -286,8 +292,8 @@ class SpiderHtmlFile :
                         spider = SiteSpider(self.domain, spiderChildLevel=True)
                         if(url.find(self.domain) == -1 and url[0:3] != "http") :
                             url = self.domain + '/' + url  if  url[0] != '/' else self.domain + url
-                        spider.run(url)
-                        if spider.htmlContent == "" :
+                        result = spider.run(url)
+                        if result != False and spider.htmlContent == "" :
                             self.urlList.remove(oldUrl)
                     except Exception as e:
                         (self.urlList).remove(oldUrl)
