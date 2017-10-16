@@ -10,6 +10,7 @@ import re
 
 class SiteSpider :
 
+
     @staticmethod
     def setLevel(level):
         SiteSpider.level = level
@@ -42,21 +43,22 @@ class SiteSpider :
 
     htmlRe = [
         #<script src="http://bk.st.styleweb.com.cn/editor/html/jquery.min.html"></script>
-        re.compile(r'<a[\s\d\w"\']*href="([^"]+)"', re.I),
-        re.compile(r"<a[\s\d\w\"']*href='([^']+)'", re.I)
+        #(?<!\.jpg) href不以'.jpg'结束
+        re.compile(r'<a[\s\d\w"\']*href="([^"]+)(?<!\.jpg)"', re.I),
+        re.compile(r"<a[\s\d\w\"']*href='([^']+)(?<!\.jpg)'", re.I)
     ]
     htmlDir = "html"
 
     htmlContent = ""
 
-    def __init__(self, domain, indexPage="", spiderChildLevel=False):
+    def __init__(self, domain, indexPage="", spiderChildLevel=False, directory=''):
 
         self.domain = domain
         self.indexPage = indexPage if indexPage==None else ""
         self.savePath = os.getcwd() + "/" + self.__getDomainName()
         self.spiderChildLevel = spiderChildLevel
         self.__checkAndCreateSaveDir()
-
+        self.directory = directory
 
     def __checkAndCreateSaveDir(self):
         if os.path.exists(self.savePath) == False :
@@ -65,14 +67,17 @@ class SiteSpider :
 
     def run(self,url=''):
 
+        # 防止重复下载
         if url in SiteSpider.downingList :
 
             return False
 
         SiteSpider.downingList.append(url)
 
+        # 下载指定当前页面
         self.__spiderSpecialPage(url)
 
+        # 设置下载级别，以备循环调用判断当前层级
         level = self.getLevel()
         if level > 0 :
             SiteSpider.setLevel(level - 1)
@@ -113,7 +118,7 @@ class SiteSpider :
         try:
             spider = SpiderText(url)
             fileName = self.getPageFileName(url)
-            filePath = self.savePath + "/" + fileName
+            filePath = self.savePath + "/" + self.directory + fileName
             spider.setUrlContent(url)
             self.__updateContent(str(spider.content, 'utf-8'))
         except Exception as e:
@@ -137,7 +142,8 @@ class SiteSpider :
         #2. 抓取所有提取到的css文件并保存到本地
         #3. 替换所有css url
 
-        spiderCss = SpiderCssFile(htmlContent, self.cssRe, relativeDir=self.cssDir, rootDir=self.savePath)
+        spiderCss = SpiderCssFile(htmlContent, self.cssRe, relativeDir=self.cssDir,
+                                  rootDir=self.savePath, domain=self.domain, directory=self.directory)
         spiderCss.run()
         self.__updateContent(spiderCss.content)
         pass
@@ -147,14 +153,15 @@ class SiteSpider :
 
     def __spiderJs(self, htmlContent):
         #抓取js
-        spiderJs = SpiderJsFile(htmlContent, self.jsRe, relativeDir=self.jsDir, rootDir=self.savePath, domain = self.domain)
+        spiderJs = SpiderJsFile(htmlContent, self.jsRe, relativeDir=self.jsDir,
+                                rootDir=self.savePath, domain = self.domain, directory=self.directory)
         spiderJs.run()
         self.__updateContent(spiderJs.content)
         pass
 
     def __spiderImage(self, htmlContent):
         #抓取js
-        spiderImage = SpiderImageFile(htmlContent, self.imageRe, relativeDir=self.imageDir, rootDir=self.savePath, domain = self.domain)
+        spiderImage = SpiderImageFile(htmlContent, self.imageRe, relativeDir=self.imageDir, rootDir=self.savePath, domain = self.domain, directory=self.directory)
         spiderImage.run()
         self.__updateContent(spiderImage.content)
         pass
@@ -169,12 +176,16 @@ class SiteSpider :
     def __getPageName(self,url='',isAbsolutPath=True):
         if url=='' :
             # 获取首页地址
-            indexPageUrl = self.domain +  "/" + self.indexPage
+            indexPageUrl = self.domain +  "/" + self.directory + self.indexPage
             return  indexPageUrl
         else :
 
             r = re.compile('^http.*',re.I)
-            url = url if r.match(url) != None else  self.domain + url
+
+            if r.match(url) == None and url[0,1] != '/':
+                url = self.domain + self.directory + url
+            elif r.match(url) == None :
+                url = self.domain + url
 
             fileName = url.replace('/','__')
             fileName = fileName.replace('\\','___')
@@ -185,7 +196,7 @@ class SiteSpider :
             fileName = fileName[0:120]
             relativeDir = self.__getDomainName()
             if isAbsolutPath :
-                saveDir = os.getcwd() + '/' + relativeDir
+                saveDir = os.getcwd() + '/' + relativeDir + self.directory
                 try :
                     if os.path.exists(saveDir) == False:
                         os.makedirs(saveDir)
@@ -194,7 +205,7 @@ class SiteSpider :
                     savePath = False
                     print(str(e))
             else :
-                savePath = relativeDir + "/" + fileName + '.html'
+                savePath = relativeDir + "/" + self.directory + fileName + '.html'
             return  savePath
             pass
 
@@ -268,7 +279,8 @@ class SpiderHtmlFile :
                     or url.find('qq.com') != -1 \
                     or url.find('baidu.com') != -1 \
                     or url.find('javascript:;') != -1 :
-                self.urlList.remove(url)
+                if url in self.urlList:
+                    self.urlList.remove(url)
             else :
                 tmpList.append(url)
         uniqueList = []
@@ -281,7 +293,7 @@ class SpiderHtmlFile :
         if len(self.urlList) > 0 :
 
             level = SiteSpider.getLevel()
-            if level < 4 :
+            if level < 1 :
 
                 SiteSpider.setLevel(level + 1)
                 for url in self.urlList :
@@ -346,10 +358,12 @@ class SpiderHtmlFile :
         pass
 
 
+
+
 if __name__ == '__main__' :
     domain = "http://chongwumoban.s5.cn.vc"
     SiteSpider.setLevel(SiteSpider.getLevel()+1)
-    spider = SiteSpider("http://chongwumoban.s5.cn.vc", spiderChildLevel=True)
+    spider = SiteSpider("http://demo.cssmoban.com", directory='/cssthemes4/hxc_18_sedna/', spiderChildLevel=True)
     spider.run()
     # spider.run("http://chongwumoban.s5.cn.vc/fuwu")
 

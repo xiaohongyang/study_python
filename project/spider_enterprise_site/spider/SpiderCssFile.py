@@ -4,19 +4,22 @@ from project.tools.spider.spider_text import *
 from  pathlib import Path;
 import re
 import base64
+from project.spider_enterprise_site.spider.BaseSpider import BaseSpider
 
 #1. 抓取所有css url
 #2. 抓取所有提取到的css文件并保存到本地
 #3. 替换所有css url
-class SpiderCssFile :
+class SpiderCssFile (BaseSpider):
     urlList = []
     rootDir = []
-    def __init__(self, content, cssRe, relativeDir, rootDir):
+    def __init__(self, content, cssRe, relativeDir, rootDir, domain, directory):
 
         self.content = content
         self.cssRe = cssRe
         self.relativeDir = relativeDir
         self.rootDir = rootDir
+        self.domain = domain
+        self.directory = directory
 
     def run(self):
         self.getCssUrlList()
@@ -42,12 +45,14 @@ class SpiderCssFile :
                 oldUrl = url
                 try :
                     if os.path.isfile(savePath) == False :
+                        url = self.getWebUrl(url, self.domain, self.directory)
                         spiderTextObj = SpiderText()
                         spiderTextObj.saveText(url, savePath)
                 except Exception as e:
                     self.urlList.remove(oldUrl)
 
         pass
+
 
     def replaceContent(self):
         # 3. 替换所有css url
@@ -67,7 +72,10 @@ class SpiderCssFile :
         # fileName = str(fileName)
 
         r = re.compile('^http.*',re.I)
-        url = url if r.match(url) != None else  self.domain + url
+        if r.match(url) == None and url[0:1] != '/':
+            url = self.domain + self.directory + url
+        elif r.match(url) == None :
+            url = self.domain + url
 
         fileName = url.replace('/','__')
         fileName = fileName.replace('\\','___')
@@ -78,7 +86,8 @@ class SpiderCssFile :
         fileName = fileName[0:120]
         saveDir = self.relativeDir
         if isAbsolutPath :
-            saveDir = self.rootDir + '/' + saveDir
+            # 保存文件内容的时候使用绝对路径
+            saveDir = self.rootDir + '/' + saveDir + self.directory
             try :
                 if os.path.exists(saveDir) == False:
                     os.makedirs(saveDir)
@@ -87,7 +96,8 @@ class SpiderCssFile :
                 savePath = False
                 print(str(e))
         else :
-            savePath = self.relativeDir + "/" + fileName + '.css'
+            # 获取文件地址时使用相对路径，(将来更新html中的路径字符串)
+            savePath = self.relativeDir + "/" + self.directory + fileName + '.css'
         return  savePath
         pass
 

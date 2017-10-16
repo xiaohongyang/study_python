@@ -5,19 +5,21 @@ from  pathlib import Path;
 import re
 import base64
 import urllib
+from project.spider_enterprise_site.spider.BaseSpider import BaseSpider
 #1. 抓取所有js url
 #2. 抓取所有提取到的js文件并保存到本地
 #3. 替换所有js url
-class SpiderJsFile :
+class SpiderJsFile (BaseSpider):
     urlList = []
     rootDir = []
-    def __init__(self, content, jsRe, relativeDir, rootDir, domain):
+    def __init__(self, content, jsRe, relativeDir, rootDir, domain, directory):
 
         self.content = content
         self.jsRe = jsRe
         self.relativeDir = relativeDir
         self.rootDir = rootDir
         self.domain = domain
+        self.directory = directory
 
     def run(self):
         self.getJsUrlList()
@@ -49,7 +51,7 @@ class SpiderJsFile :
 
                         downUrl = url
                         r = re.compile('^http.*',re.I)
-                        downUrl = downUrl if r.match(downUrl) != None else  self.domain + downUrl
+                        downUrl = self.getWebUrl(downUrl, self.domain, self.directory)
                         spiderTextObj.saveText(downUrl, savePath)
                 except Exception as e :
                     self.urlList.remove(oldUrl)
@@ -87,7 +89,7 @@ class SpiderJsFile :
         fileName = fileName[0:120]
         saveDir = self.relativeDir
         if isAbsolutPath :
-            saveDir = self.rootDir + '/' + saveDir
+            saveDir = self.rootDir + '/' + saveDir + self.directory
             try :
                 if os.path.exists(saveDir) == False:
                     os.makedirs(saveDir)
@@ -96,7 +98,7 @@ class SpiderJsFile :
                 savePath = False
                 print(str(e))
         else :
-            savePath = self.relativeDir + "/" + fileName + '.js'
+            savePath = self.relativeDir + "/" + self.directory + fileName + '.js'
         return  savePath
         pass
 

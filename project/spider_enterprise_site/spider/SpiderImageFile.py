@@ -5,19 +5,21 @@ from  pathlib import Path;
 import re
 import base64
 import urllib
+from project.spider_enterprise_site.spider.BaseSpider import BaseSpider
 #1. 抓取所有image url
 #2. 抓取所有提取到的image文件并保存到本地
 #3. 替换所有image url
-class SpiderImageFile :
+class SpiderImageFile (BaseSpider):
     urlList = []
     rootDir = []
-    def __init__(self, content, imageRe, relativeDir, rootDir, domain):
+    def __init__(self, content, imageRe, relativeDir, rootDir, domain, directory):
 
         self.content = content
         self.imageRe = imageRe
         self.relativeDir = relativeDir
         self.rootDir = rootDir
         self.domain = domain
+        self.directory = directory
 
     def run(self):
         self.getImageUrlList()
@@ -49,7 +51,7 @@ class SpiderImageFile :
 
                         downUrl = url
                         r = re.compile('^http.*',re.I)
-                        downUrl = downUrl if r.match(downUrl) != None else  self.domain + downUrl
+                        downUrl = self.getWebUrl(downUrl, self.domain, self.directory)
                         spiderTextObj.saveText(downUrl, savePath)
                 except Exception as e :
                     self.urlList.remove(oldUrl)
@@ -76,7 +78,10 @@ class SpiderImageFile :
         # fileName = str(fileName)
 
         r = re.compile('^http.*',re.I)
-        url = url if r.match(url) != None else  self.domain + url
+        if r.match(url) == None and url[0:1] != '/':
+            url = self.domain + self.directory + url
+        elif r.match(url) == None :
+            url = self.domain + url
 
         fileName = url.replace("http://","")
         fileName = fileName.replace("https://","")
@@ -86,12 +91,14 @@ class SpiderImageFile :
         fileName = fileNameList[(len(fileNameList)-1)]
 
 
+
+
         relativePath = '/'.join(fileNameList[0:(len(fileNameList)-1)])
         relativePath = self.relativeDir + '/' + relativePath
 
         saveDir = relativePath
         if isAbsolutPath :
-            saveDir = self.rootDir + '/' + saveDir
+            saveDir = self.rootDir + '/' + saveDir + self.directory
             try :
                 if os.path.exists(saveDir) == False:
                     os.makedirs(saveDir)
@@ -100,7 +107,7 @@ class SpiderImageFile :
                 savePath = False
                 print(str(e))
         else :
-            savePath = relativePath + "/" + fileName
+            savePath = relativePath + "/" + self.directory + fileName
         return  savePath
         pass
 
