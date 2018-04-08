@@ -10,6 +10,7 @@ import re
 
 class SiteSpider :
 
+    downRootDir = "down_site/"
 
     @staticmethod
     def setLevel(level):
@@ -363,7 +364,8 @@ class SpiderHtmlFile :
 if __name__ == '__main__' :
     domain = "http://chongwumoban.s5.cn.vc"
     SiteSpider.setLevel(SiteSpider.getLevel()+1)
-    spider = SiteSpider("http://demo.cssmoban.com", directory='/cssthemes4/hxc_18_sedna/', spiderChildLevel=True)
+    # spider = SiteSpider("http://demo.cssmoban.com", directory='/cssthemes4/hxc_18_sedna/', spiderChildLevel=True)
+    spider = SiteSpider(domain, directory='', spiderChildLevel=True)
     spider.run()
     # spider.run("http://chongwumoban.s5.cn.vc/fuwu")
 
