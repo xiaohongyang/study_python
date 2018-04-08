@@ -40,7 +40,8 @@ class WorkerTimeSpider():
             #'Cookie': 'yunsuo_session_verify=a730a7892052999e590ababb6ac27e99; sessionid=bed716cf36da098292d1175a4ac188a1'
             #'Cookie': 'yunsuo_session_verify=a730a7892052999e590ababb6ac27e99; sessionid=6f363be21bb4d8961ca457a4c50ca16c'
             # 'Cookie': '_ws_uid=2cb1690bP1022220009U2032B21S10A16.90348; yunsuo_session_verify=a730a7892052999e590ababb6ac27e99; sessionid=35d779891d73bafc1314f1fb663644a3'
-            'Cookie': '_ws_uid=2cb1690bP1022220009U2032B21S10A16.90348; yunsuo_session_verify=a730a7892052999e590ababb6ac27e99; sessionid=f7c6b555f49a48902b3a9f347db74aaa'
+            # 'Cookie': '_ws_uid=2cb1690bP1022220009U2032B21S10A16.90348; yunsuo_session_verify=a730a7892052999e590ababb6ac27e99; sessionid=f7c6b555f49a48902b3a9f347db74aaa'
+            'Cookie': '_ws_uid=2cb1690bP1022220009U2032B21S10A16.90348; yunsuo_session_verify=a730a7892052999e590ababb6ac27e99; sessionid=1c01f8b1dbe7348888ea3dff9627ccc0'
 
 
         }
@@ -111,6 +112,7 @@ def getData():
         spider = WorkerTimeSpider(url, sessionid)
         rs = spider.getTimes(i,saveFileName='./data/worker_times_'+date.today().__str__()+'.txt')
         if spider.isSessionOk == False:
+            print("spider failed," , "session is passed")
             break
 
 
