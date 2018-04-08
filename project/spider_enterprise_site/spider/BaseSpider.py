@@ -8,6 +8,8 @@ class BaseSpider:
     @staticmethod
     def getWebUrl(url, domain, directory):
 
+        if(len(url) > 3 and url[:2] == "//"):
+            url = url.replace(url[:2], "http://")
         r = re.compile('^http.*',re.I)
         if r.match(url) == None and url[0:1] != '/':
             url = domain + directory + url
