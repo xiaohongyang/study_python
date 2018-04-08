@@ -361,9 +361,14 @@ class SpiderHtmlFile :
 
 
 if __name__ == '__main__' :
-    domain = "http://chongwumoban.s5.cn.vc"
+    # domain = "http://chongwumoban.s5.cn.vc"
+    # SiteSpider.setLevel(SiteSpider.getLevel()+1)
+    # spider = SiteSpider("http://demo.cssmoban.com", directory='/cssthemes4/sbtp_60_sept/', spiderChildLevel=True)
+    # spider.run()
+
+    domain = "http://www.haorooms.com"
     SiteSpider.setLevel(SiteSpider.getLevel()+1)
-    spider = SiteSpider("http://demo.cssmoban.com", directory='/cssthemes4/hxc_18_sedna/', spiderChildLevel=True)
+    spider = SiteSpider("http://resource.haorooms.com", directory='', spiderChildLevel=True)
     spider.run()
     # spider.run("http://chongwumoban.s5.cn.vc/fuwu")
 
