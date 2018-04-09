@@ -368,7 +368,7 @@ if __name__ == '__main__' :
 
     domain = "http://www.haorooms.com"
     SiteSpider.setLevel(SiteSpider.getLevel()+1)
-    spider = SiteSpider("http://www.haorooms.com", directory='', spiderChildLevel=True)
+    spider = SiteSpider("http://chongwumoban.s5.cn.vc", directory='', spiderChildLevel=True)
     spider.run()
     # spider.run("http://chongwumoban.s5.cn.vc/fuwu")
 

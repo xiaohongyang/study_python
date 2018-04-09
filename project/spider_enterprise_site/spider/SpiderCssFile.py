@@ -48,10 +48,11 @@ class SpiderCssFile (BaseSpider):
                 oldUrl = url
                 try :
                     if os.path.isfile(savePath) == False :
-                        url = self.getWebUrl(url, self.domain, self.directory)
+                        webUrl = self.getWebUrl(url, self.domain, self.directory)
                         spiderTextObj = SpiderText()
-                        spiderTextObj.saveText(url, savePath)
+                        spiderTextObj.saveText(webUrl, savePath)
                 except Exception as e:
+                    #下载异常则从下载队列中移除
                     self.urlList.remove(oldUrl)
 
         pass
@@ -80,12 +81,16 @@ class SpiderCssFile (BaseSpider):
         elif r.match(url) == None :
             url = self.domain + url
 
-        fileName = url.replace('/','__')
-        fileName = fileName.replace('\\','___')
-        fileName = fileName.replace(':','____')
-        fileName = fileName.replace('?','_____')
-        fileName = fileName.replace('&','_______')
-        fileName = fileName.replace('%','________')
+        url = url.split(".css")[0]
+
+        fileName = url.replace('/','_')
+        fileName = fileName.replace('\\','_')
+        fileName = fileName.replace(':','_')
+        fileName = fileName.replace('?','_')
+        fileName = fileName.replace('&','_')
+        fileName = fileName.replace('%','_')
+        fileName = fileName.replace(',','_')
+        fileName = fileName.replace('-','_')
         fileName = fileName[0:120]
         _tmpRelativeDir = self.relativeDir
         if isAbsolutPath :

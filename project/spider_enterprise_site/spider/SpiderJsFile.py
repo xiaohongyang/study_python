@@ -80,6 +80,8 @@ class SpiderJsFile (BaseSpider):
         r = re.compile('^http.*',re.I)
         url = url if r.match(url) != None else  self.domain + url
 
+        url = url.split(".js")[0]
+
         fileName = url.replace('/','__')
         fileName = fileName.replace('\\','___')
         fileName = fileName.replace(':','____')
