@@ -51,11 +51,11 @@ class SiteSpider :
 
     htmlContent = ""
 
-    def __init__(self, domain, indexPage="", spiderChildLevel=False, directory=''):
+    def __init__(self, domain, indexPage="", spiderChildLevel=False, directory='', saveToDirectory='down_site/'):
 
         self.domain = domain
         self.indexPage = indexPage if indexPage==None else ""
-        self.savePath = os.getcwd() + "/" + self.__getDomainName()
+        self.savePath = os.getcwd() + "/" + saveToDirectory + self.__getDomainName()
         self.spiderChildLevel = spiderChildLevel
         self.__checkAndCreateSaveDir()
         self.directory = directory
@@ -342,18 +342,18 @@ class SpiderHtmlFile :
         fileName = fileName.replace('&','_______')
         fileName = fileName.replace('%','________')
         fileName = fileName[0:120]
-        saveDir = self.relativeDir
+        _tmpRelativeDir = self.relativeDir
         if isAbsolutPath :
-            saveDir = self.rootDir + '/' + saveDir
+            _tmpRelativeDir = self.rootDir + '/' + _tmpRelativeDir
             try :
-                if os.path.exists(saveDir) == False:
-                    os.makedirs(saveDir)
-                savePath = saveDir + '/' + fileName + '.html'
+                if os.path.exists(_tmpRelativeDir) == False:
+                    os.makedirs(_tmpRelativeDir)
+                savePath = _tmpRelativeDir + '/' + fileName + '.html'
             except Exception as e:
                 savePath = False
                 print(str(e))
         else :
-            savePath = self.relativeDir + "/" + fileName + '.html'
+            savePath = _tmpRelativeDir + "/" + fileName + '.html'
         return  savePath
         pass
 
@@ -368,7 +368,7 @@ if __name__ == '__main__' :
 
     domain = "http://www.haorooms.com"
     SiteSpider.setLevel(SiteSpider.getLevel()+1)
-    spider = SiteSpider("http://resource.haorooms.com", directory='', spiderChildLevel=True)
+    spider = SiteSpider("http://www.haorooms.com", directory='', spiderChildLevel=True)
     spider.run()
     # spider.run("http://chongwumoban.s5.cn.vc/fuwu")
 
