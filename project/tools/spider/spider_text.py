@@ -20,6 +20,8 @@ class SpiderText:
         '''
         self.setUrlContent(url)
 
+        fileName = fileName.replace('\\', '/');
+
         try:
             file = open(fileName, 'wb')
             file.write(self.content)
