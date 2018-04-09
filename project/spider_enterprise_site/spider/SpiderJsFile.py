@@ -87,18 +87,18 @@ class SpiderJsFile (BaseSpider):
         fileName = fileName.replace('&','_______')
         fileName = fileName.replace('%','________')
         fileName = fileName[0:120]
-        saveDir = self.relativeDir
+        _tmpRelativeDir = self.relativeDir
         if isAbsolutPath :
-            saveDir = self.rootDir + '/' + saveDir + self.directory
+            _tmpRelativeDir = self.rootDir + '/' + _tmpRelativeDir + self.directory
             try :
-                if os.path.exists(saveDir) == False:
-                    os.makedirs(saveDir)
-                savePath = saveDir + '/' + fileName + '.js'
+                if os.path.exists(_tmpRelativeDir) == False:
+                    os.makedirs(_tmpRelativeDir)
+                savePath = _tmpRelativeDir + '/' + fileName + '.js'
             except Exception as e:
                 savePath = False
                 print(str(e))
         else :
-            savePath = self.relativeDir + "/" + self.directory + fileName + '.js'
+            savePath = _tmpRelativeDir + "/" + self.directory + fileName + '.js'
         return  savePath
         pass
 

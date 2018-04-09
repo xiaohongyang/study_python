@@ -22,8 +22,11 @@ class SpiderCssFile (BaseSpider):
         self.directory = directory
 
     def run(self):
+        #抓取所有css url
         self.getCssUrlList()
+        #抓取所有提取到的css文件并保存到本地
         self.saveCssFiles()
+        #替换所有css url
         self.replaceContent()
         pass
 
@@ -84,20 +87,20 @@ class SpiderCssFile (BaseSpider):
         fileName = fileName.replace('&','_______')
         fileName = fileName.replace('%','________')
         fileName = fileName[0:120]
-        saveDir = self.relativeDir
+        _tmpRelativeDir = self.relativeDir
         if isAbsolutPath :
             # 保存文件内容的时候使用绝对路径
-            saveDir = self.rootDir + '/' + saveDir + self.directory
+            _tmpRelativeDir = self.rootDir + '/' + _tmpRelativeDir + self.directory
             try :
-                if os.path.exists(saveDir) == False:
-                    os.makedirs(saveDir)
-                savePath = saveDir + '/' + fileName + '.css'
+                if os.path.exists(_tmpRelativeDir) == False:
+                    os.makedirs(_tmpRelativeDir)
+                savePath = _tmpRelativeDir + '/' + fileName + '.css'
             except Exception as e:
                 savePath = False
                 print(str(e))
         else :
             # 获取文件地址时使用相对路径，(将来更新html中的路径字符串)
-            savePath = self.relativeDir + "/" + self.directory + fileName + '.css'
+            savePath = _tmpRelativeDir + "/" + self.directory + fileName + '.css'
         return  savePath
         pass
 

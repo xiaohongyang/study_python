@@ -96,18 +96,18 @@ class SpiderImageFile (BaseSpider):
         relativePath = '/'.join(fileNameList[0:(len(fileNameList)-1)])
         relativePath = self.relativeDir + '/' + relativePath
 
-        saveDir = relativePath
+        _tmpRelativeDir = relativePath
         if isAbsolutPath :
-            saveDir = self.rootDir + '/' + saveDir + self.directory
+            _tmpRelativeDir = self.rootDir + '/' + _tmpRelativeDir + self.directory
             try :
-                if os.path.exists(saveDir) == False:
-                    os.makedirs(saveDir)
-                savePath = saveDir + '/' + fileName
+                if os.path.exists(_tmpRelativeDir) == False:
+                    os.makedirs(_tmpRelativeDir)
+                savePath = _tmpRelativeDir + '/' + fileName
             except Exception as e:
                 savePath = False
                 print(str(e))
         else :
-            savePath = relativePath + "/" + self.directory + fileName
+            savePath = _tmpRelativeDir + "/" + self.directory + fileName
         return  savePath
         pass
 
